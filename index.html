@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Rubik:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body class="bg-[#161210] text-[#FFF9F2] overflow-hidden select-none">
     <div id="app" class="relative w-screen h-screen overflow-hidden">
@@ -22,7 +22,7 @@
       <!-- Loading Screen -->
       <div id="screen-loading" class="overlay-screen active" role="status" aria-live="polite">
         <div class="surface-card max-w-md w-full text-center p-8">
-          <img src="/assets/logo-nalavashe.svg" alt="Логотип На LAVAше" class="w-16 h-16 mx-auto mb-4" />
+          <img src="./assets/logo-nalavashe.svg" alt="Логотип На LAVAше" class="w-16 h-16 mx-auto mb-4" />
           <h1 class="font-display text-3xl font-black tracking-tight text-white mb-2">LAVA DASH</h1>
           <p class="text-sm text-[#D6C7BC] mb-6">Разогреваем гриль и строим улицы города...</p>
           <div class="w-full h-2.5 bg-[#2A211C] rounded-full overflow-hidden mb-3">
@@ -32,13 +32,25 @@
         </div>
       </div>
 
+      <!-- WebGL initialization fallback -->
+      <div id="screen-error" class="overlay-screen" aria-hidden="true" role="alert">
+        <div class="surface-card max-w-md w-full text-center p-7 sm:p-8">
+          <img src="./assets/logo-nalavashe.svg" alt="На LAVAше" class="w-14 h-14 mx-auto mb-4" />
+          <h1 class="font-display text-2xl font-black text-white mb-2">Не удалось запустить игру</h1>
+          <p class="text-sm text-[#D6C7BC] leading-relaxed mb-6">
+            Браузер не смог создать 3D-сцену. Обновите страницу или откройте игру в браузере с поддержкой WebGL.
+          </p>
+          <a href="https://nalavashe-vl.ru/" class="btn-primary w-full">ПЕРЕЙТИ НА САЙТ РЕСТОРАНА</a>
+        </div>
+      </div>
+
       <!-- Main Menu Screen -->
       <div id="screen-menu" class="overlay-screen pointer-events-none" aria-hidden="true">
         <div class="w-full h-full flex flex-col justify-between p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
           <!-- Top Brand Bar -->
           <header class="flex items-center justify-between gap-4 pointer-events-auto">
             <a href="https://nalavashe-vl.ru/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 group">
-              <img src="/assets/logo-nalavashe.svg" alt="На LAVAше" class="w-11 h-11 rounded-xl shrink-0" />
+              <img src="./assets/logo-nalavashe.svg" alt="На LAVAше" class="w-11 h-11 rounded-xl shrink-0" />
               <div class="text-left">
                 <div class="text-base font-extrabold tracking-tight text-white group-hover:text-[#FFB300] transition-colors whitespace-nowrap">На LAVAше</div>
                 <div class="text-xs text-[#C7B6AA] whitespace-nowrap">nalavashe-vl.ru</div>
@@ -231,7 +243,7 @@
               <div id="gameover-record-badge" class="hidden text-xs font-bold text-[#FFB300] mb-1">НОВЫЙ РЕКОРД!</div>
               <h2 class="font-display text-3xl sm:text-4xl font-black text-white leading-tight">ЗАБЕГ ОКОНЧЕН</h2>
             </div>
-            <img src="/assets/logo-nalavashe.svg" alt="На LAVAше" class="w-12 h-12 rounded-xl shrink-0" />
+            <img src="./assets/logo-nalavashe.svg" alt="На LAVAше" class="w-12 h-12 rounded-xl shrink-0" />
           </div>
 
           <!-- Run Stats -->
@@ -288,6 +300,6 @@
       </div>
     </div>
 
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>

@@ -29,6 +29,7 @@ export class UI {
 
     this.screens = {
       loading: document.getElementById('screen-loading'),
+      error: document.getElementById('screen-error'),
       menu: document.getElementById('screen-menu'),
       howto: document.getElementById('screen-howto'),
       hud: document.getElementById('screen-hud'),
@@ -157,10 +158,15 @@ export class UI {
     if (this.els.promoStatusSlot) {
       this.els.promoStatusSlot.classList.add('hidden');
       this.els.promoStatusSlot.textContent = '';
-      const serverReward = await this.promoService.checkRunReward(summary);
-      if (serverReward && serverReward.message) {
-        this.els.promoStatusSlot.textContent = serverReward.message;
-        this.els.promoStatusSlot.classList.remove('hidden');
+      try {
+        const serverReward = await this.promoService.checkRunReward(summary);
+        if (serverReward && serverReward.message) {
+          this.els.promoStatusSlot.textContent = serverReward.message;
+          this.els.promoStatusSlot.classList.remove('hidden');
+        }
+      } catch (error) {
+        // A promo API outage must never hide the local run results.
+        console.warn('LAVA DASH promo reward check failed:', error);
       }
     }
 
