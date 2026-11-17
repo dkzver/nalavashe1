@@ -6,6 +6,9 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Set VITE_BASE_PATH=/game/ when the built game is served from a subpath.
+    // The relative default also works for root hosting and preview deployments.
+    base: process.env.VITE_BASE_PATH || './',
     plugins: [
       react(),
       tailwindcss(),
