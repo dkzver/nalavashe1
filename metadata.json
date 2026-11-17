@@ -1,0 +1,6 @@
+{
+  "name": "LAVA DASH — На LAVAше",
+  "description": "3D-раннер LAVA DASH от ресторана «На LAVAше»: бегите за живую шаурму по ярким улицам города, собирайте вкусные блюда и ставьте рекорды.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

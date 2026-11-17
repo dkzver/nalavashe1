@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>LAVA DASH — На LAVAше</title>
+    <meta name="description" content="3D-раннер LAVA DASH от ресторана «На LAVAше»: бегите за живую шаурму по ярким улицам города, собирайте вкусные блюда и ставьте рекорды." />
+    <meta property="og:title" content="LAVA DASH — На LAVAше" />
+    <meta property="og:description" content="3D-раннер LAVA DASH от ресторана «На LAVAше»: бегите за живую шаурму по ярким улицам города, собирайте вкусные блюда и ставьте рекорды." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Rubik:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="bg-[#161210] text-[#FFF9F2] overflow-hidden select-none">
+    <div id="app" class="relative w-screen h-screen overflow-hidden">
+      <!-- 3D WebGL Viewport -->
+      <div id="game-canvas-container" class="absolute inset-0 w-full h-full"></div>
+
+      <!-- Loading Screen -->
+      <div id="screen-loading" class="overlay-screen active" role="status" aria-live="polite">
+        <div class="surface-card max-w-md w-full text-center p-8">
+          <img src="/assets/logo-nalavashe.svg" alt="Логотип На LAVAше" class="w-16 h-16 mx-auto mb-4" />
+          <h1 class="font-display text-3xl font-black tracking-tight text-white mb-2">LAVA DASH</h1>
+          <p class="text-sm text-[#D6C7BC] mb-6">Разогреваем гриль и строим улицы города...</p>
+          <div class="w-full h-2.5 bg-[#2A211C] rounded-full overflow-hidden mb-3">
+            <div id="loading-bar" class="h-full bg-gradient-to-r from-[#FF5722] to-[#FFB300] transition-all duration-200" style="width: 15%"></div>
+          </div>
+          <span id="loading-percent" class="font-mono text-xs text-[#FFB300] tabular-nums">15%</span>
+        </div>
+      </div>
+
+      <!-- Main Menu Screen -->
+      <div id="screen-menu" class="overlay-screen pointer-events-none" aria-hidden="true">
+        <div class="w-full h-full flex flex-col justify-between p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
+          <!-- Top Brand Bar -->
+          <header class="flex items-center justify-between gap-4 pointer-events-auto">
+            <a href="https://nalavashe-vl.ru/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 group">
+              <img src="/assets/logo-nalavashe.svg" alt="На LAVAше" class="w-11 h-11 rounded-xl shrink-0" />
+              <div class="text-left">
+                <div class="text-base font-extrabold tracking-tight text-white group-hover:text-[#FFB300] transition-colors whitespace-nowrap">На LAVAше</div>
+                <div class="text-xs text-[#C7B6AA] whitespace-nowrap">nalavashe-vl.ru</div>
+              </div>
+            </a>
+
+            <div class="flex items-center gap-3 shrink-0">
+              <button id="btn-sound-menu" type="button" class="btn-icon" aria-label="Включить или выключить звук" title="Звук">
+                <span class="sound-icon-on">🔊 Звук</span>
+                <span class="sound-icon-off hidden">🔇 Тихо</span>
+              </button>
+              <a href="https://nalavashe-vl.ru/" target="_blank" rel="noopener noreferrer" class="btn-secondary hidden sm:inline-flex">
+                Меню ресторана
+              </a>
+            </div>
+          </header>
+
+          <!-- Menu Center / Bottom-Left Anchor so 3D Shawarma Hero remains unobstructed in center-right -->
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 my-auto md:my-0 pb-2 md:pb-6">
+            <div class="surface-card p-6 sm:p-8 max-w-md w-full pointer-events-auto">
+              <div class="text-xs font-semibold text-[#FFB300] mb-2">Официальная 3D-игра ресторана «На LAVAше»</div>
+              <h1 class="font-display text-4xl sm:text-5xl font-black tracking-tight text-white leading-none mb-3">
+                LAVA <span class="text-[#FF5722]">DASH</span>
+              </h1>
+              <p class="text-sm sm:text-base text-[#E2D5CB] leading-relaxed mb-6">
+                Управляйте живой шаурмой, уворачивайтесь от городского трафика, перепрыгивайте барьеры и собирайте горячие комбо.
+              </p>
+
+              <div class="flex items-center justify-between py-3 px-4 rounded-xl bg-[#161210] border border-[#3B2E26] mb-6">
+                <span class="text-xs font-medium text-[#C7B6AA]">Лучший результат</span>
+                <span id="menu-best-score" class="font-mono text-xl font-bold text-[#FFB300] tabular-nums">0</span>
+              </div>
+
+              <div class="flex flex-col gap-3">
+                <button id="btn-play" type="button" class="btn-primary w-full text-base py-3.5">
+                  ИГРАТЬ
+                </button>
+                <div class="grid grid-cols-2 gap-3">
+                  <button id="btn-how-to-play" type="button" class="btn-secondary w-full">
+                    КАК ИГРАТЬ
+                  </button>
+                  <a href="https://nalavashe-vl.ru/" target="_blank" rel="noopener noreferrer" class="btn-secondary w-full text-center">
+                    ЗАКАЗАТЬ ЕДУ
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subtle Desktop Controls Legend -->
+            <div class="hidden lg:block surface-card-subtle px-5 py-4 pointer-events-auto max-w-xs">
+              <div class="text-xs font-semibold text-[#FFB300] mb-2">Быстрое управление</div>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-[#E2D5CB]">
+                <div><kbd class="kbd-key">A</kbd> / <kbd class="kbd-key">←</kbd> Влево</div>
+                <div><kbd class="kbd-key">D</kbd> / <kbd class="kbd-key">→</kbd> Вправо</div>
+                <div><kbd class="kbd-key">W</kbd> / <kbd class="kbd-key">Space</kbd> Прыжок</div>
+                <div><kbd class="kbd-key">S</kbd> / <kbd class="kbd-key">↓</kbd> Подкат</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How To Play Modal -->
+      <div id="screen-howto" class="overlay-screen" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="howto-title">
+        <div class="surface-card max-w-lg w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+          <div class="flex items-center justify-between gap-4 mb-5">
+            <h2 id="howto-title" class="font-display text-2xl font-extrabold text-white">Как играть в LAVA DASH</h2>
+            <button id="btn-close-howto" type="button" class="btn-icon" aria-label="Закрыть инструкцию">✕</button>
+          </div>
+
+          <div class="space-y-5 text-sm text-[#E2D5CB]">
+            <div>
+              <h3 class="font-bold text-white mb-2">Управление</h3>
+              <ul class="space-y-1.5 text-[#D6C7BC]">
+                <li>• <strong class="text-white">Компьютер:</strong> <kbd class="kbd-key">A</kbd>/<kbd class="kbd-key">←</kbd> и <kbd class="kbd-key">D</kbd>/<kbd class="kbd-key">→</kbd> — смена полосы, <kbd class="kbd-key">W</kbd>/<kbd class="kbd-key">↑</kbd>/<kbd class="kbd-key">Space</kbd> — прыжок, <kbd class="kbd-key">S</kbd>/<kbd class="kbd-key">↓</kbd> — подкат.</li>
+                <li>• <strong class="text-white">Смартфон:</strong> свайпы влево, вправо, вверх, вниз или удобные сенсорные кнопки внизу экрана.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="font-bold text-white mb-2">Очки за меню на дороге</h3>
+              <div class="grid grid-cols-2 gap-2.5 text-xs">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#161210] border border-[#3B2E26]">
+                  <span>Шаурма</span>
+                  <span class="font-mono font-bold text-[#FFB300]">+100</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#161210] border border-[#3B2E26]">
+                  <span>Бургер</span>
+                  <span class="font-mono font-bold text-[#FFB300]">+150</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#161210] border border-[#3B2E26]">
+                  <span>Картофель фри</span>
+                  <span class="font-mono font-bold text-[#FFB300]">+120</span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#161210] border border-[#3B2E26]">
+                  <span>Напиток</span>
+                  <span class="font-mono font-bold text-[#2EBD59]">+50</span>
+                </div>
+              </div>
+              <div class="mt-2.5 flex items-center justify-between p-3 rounded-lg bg-[#2A1A14] border border-[#FF5722]/50 text-xs">
+                <span class="font-semibold text-white">Специальный бонус «На LAVAше»</span>
+                <span class="font-mono font-bold text-[#FF7A2F]">+500</span>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="font-bold text-white mb-1.5">Препятствия</h3>
+              <p class="text-[#D6C7BC]">
+                Перепрыгивайте конусы и низкие дорожные барьеры, ныряйте под высокие рамки подкатом и объезжайте автомобили и мусорные контейнеры по соседним полосам.
+              </p>
+            </div>
+          </div>
+
+          <button id="btn-howto-play-start" type="button" class="btn-primary w-full mt-6">
+            ПОНЯТНО, ПОБЕЖАЛИ!
+          </button>
+        </div>
+      </div>
+
+      <!-- In-Game HUD -->
+      <div id="screen-hud" class="hidden absolute inset-0 pointer-events-none z-20 flex flex-col justify-between p-3 sm:p-5">
+        <!-- Top HUD Bar -->
+        <div class="flex items-start justify-between gap-3 w-full max-w-6xl mx-auto">
+          <div class="hud-panel flex items-center gap-4 sm:gap-6 px-4 py-2.5 pointer-events-auto">
+            <div>
+              <div class="text-[11px] font-medium text-[#C7B6AA]">Счёт</div>
+              <div id="hud-score" class="font-mono text-xl sm:text-2xl font-bold text-[#FFB300] tabular-nums leading-tight">0</div>
+            </div>
+            <div class="w-px h-8 bg-[#3B2E26]"></div>
+            <div>
+              <div class="text-[11px] font-medium text-[#C7B6AA]">Дистанция</div>
+              <div id="hud-distance" class="font-mono text-base sm:text-lg font-bold text-white tabular-nums leading-tight">0 м</div>
+            </div>
+            <div class="w-px h-8 bg-[#3B2E26]"></div>
+            <div>
+              <div class="text-[11px] font-medium text-[#C7B6AA]">Собрано</div>
+              <div id="hud-items" class="font-mono text-base sm:text-lg font-bold text-[#2EBD59] tabular-nums leading-tight">0</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 pointer-events-auto shrink-0">
+            <button id="btn-sound-hud" type="button" class="btn-icon" aria-label="Включить или выключить звук" title="Звук">
+              <span class="sound-icon-on">🔊</span>
+              <span class="sound-icon-off hidden">🔇</span>
+            </button>
+            <button id="btn-pause" type="button" class="btn-icon font-bold" aria-label="Пауза" title="Пауза (Esc / P)">
+              ❚❚
+            </button>
+          </div>
+        </div>
+
+        <!-- Floating Pickup Feedback Layer -->
+        <div id="hud-float-layer" class="relative flex-1 w-full max-w-2xl mx-auto overflow-hidden pointer-events-none"></div>
+
+        <!-- Mobile / Touch On-Screen Controls -->
+        <div id="mobile-controls" class="w-full max-w-3xl mx-auto flex items-end justify-between gap-3 pb-2 pointer-events-auto">
+          <div class="flex items-center gap-2.5">
+            <button id="touch-left" type="button" class="touch-btn" aria-label="Влево">◀</button>
+            <button id="touch-right" type="button" class="touch-btn" aria-label="Вправо">▶</button>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button id="touch-slide" type="button" class="touch-btn touch-btn-action" aria-label="Подкат">▼</button>
+            <button id="touch-jump" type="button" class="touch-btn touch-btn-jump" aria-label="Прыжок">▲</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause Overlay -->
+      <div id="screen-pause" class="overlay-screen" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="surface-card max-w-sm w-full p-7 text-center">
+          <div class="text-xs font-semibold text-[#FFB300] mb-1">Игра на паузе</div>
+          <h2 class="font-display text-3xl font-black text-white mb-6">ПАУЗА</h2>
+          <div class="flex flex-col gap-3">
+            <button id="btn-resume" type="button" class="btn-primary w-full">ПРОДОЛЖИТЬ</button>
+            <button id="btn-restart-pause" type="button" class="btn-secondary w-full">НАЧАТЬ ЗАНОВО</button>
+            <button id="btn-sound-pause" type="button" class="btn-secondary w-full">
+              <span class="sound-icon-on">Звук: Вкл</span>
+              <span class="sound-icon-off hidden">Звук: Выкл</span>
+            </button>
+            <button id="btn-menu-pause" type="button" class="btn-ghost w-full">В ГЛАВНОЕ МЕНЮ</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Over & Restaurant Marketing Screen -->
+      <div id="screen-gameover" class="overlay-screen" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="surface-card max-w-xl w-full p-6 sm:p-8 max-h-[92vh] overflow-y-auto">
+          <div class="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <div id="gameover-record-badge" class="hidden text-xs font-bold text-[#FFB300] mb-1">НОВЫЙ РЕКОРД!</div>
+              <h2 class="font-display text-3xl sm:text-4xl font-black text-white leading-tight">ЗАБЕГ ОКОНЧЕН</h2>
+            </div>
+            <img src="/assets/logo-nalavashe.svg" alt="На LAVAше" class="w-12 h-12 rounded-xl shrink-0" />
+          </div>
+
+          <!-- Run Stats -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+            <div class="stat-box">
+              <div class="text-xs text-[#C7B6AA]">Счёт</div>
+              <div id="go-score" class="font-mono text-2xl font-bold text-[#FFB300] tabular-nums">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="text-xs text-[#C7B6AA]">Дистанция</div>
+              <div id="go-distance" class="font-mono text-xl font-bold text-white tabular-nums">0 м</div>
+            </div>
+            <div class="stat-box">
+              <div class="text-xs text-[#C7B6AA]">Собрано</div>
+              <div id="go-items" class="font-mono text-xl font-bold text-[#2EBD59] tabular-nums">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="text-xs text-[#C7B6AA]">Рекорд</div>
+              <div id="go-best" class="font-mono text-xl font-bold text-white tabular-nums">0</div>
+            </div>
+          </div>
+
+          <!-- Restaurant Marketing Banner -->
+          <div class="p-4 sm:p-5 rounded-xl bg-gradient-to-br from-[#2B1B14] to-[#1A1411] border border-[#FF5722]/45 mb-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div class="text-xs font-bold text-[#FFB300] mb-1">Ресторан «На LAVAше»</div>
+                <h3 class="text-lg font-extrabold text-white mb-1">Разыгрался аппетит?</h3>
+                <p class="text-xs sm:text-sm text-[#E2D5CB] leading-relaxed">
+                  Закажите сочную шаурму на углях, авторские бургеры, хрустящий фри и освежающие напитки с доставкой или самовывозом.
+                </p>
+              </div>
+              <a id="btn-order-food" href="https://nalavashe-vl.ru/" target="_blank" rel="noopener noreferrer" class="btn-primary shrink-0 text-center">
+                ПЕРЕЙТИ К ЗАКАЗУ
+              </a>
+            </div>
+            <!-- Extensible Server-Verified Promo Status Slot (inactive until server promo API is connected) -->
+            <div id="promo-status-slot" class="hidden mt-3 pt-3 border-t border-white/10 text-xs text-[#E2D5CB]"></div>
+          </div>
+
+          <!-- Actions -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button id="btn-retry" type="button" class="btn-primary w-full py-3.5">
+              ЕЩЁ РАЗ
+            </button>
+            <a href="https://nalavashe-vl.ru/" target="_blank" rel="noopener noreferrer" class="btn-secondary w-full py-3.5 text-center">
+              НА САЙТ РЕСТОРАНА
+            </a>
+          </div>
+          <button id="btn-go-menu" type="button" class="btn-ghost w-full mt-2.5 text-xs">
+            Вернуться в главное меню
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
