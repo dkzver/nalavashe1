@@ -28,12 +28,14 @@ export class Controls {
     this.touchTarget.addEventListener('touchstart', this._onTouchStart, { passive: false });
     this.touchTarget.addEventListener('touchmove', this._onTouchMove, { passive: false });
     this.touchTarget.addEventListener('touchend', this._onTouchEnd, { passive: true });
+    this.touchTarget.addEventListener('touchcancel', this._onTouchEnd, { passive: true });
 
     this._bindMobileButtons();
   }
 
   setEnabled(value) {
     this.enabled = value;
+    if (!value) this.swipeConsumed = false;
   }
 
   _bindMobileButtons() {
@@ -59,12 +61,24 @@ export class Controls {
   }
 
   _handleKeyDown(e) {
-    if (e.code === 'Escape' || e.code === 'KeyP') {
+    if (e.repeat) return;
+
+    if (e.code === 'Escape') {
       this.handlers.onPauseToggle();
       return;
     }
 
-    if (!this.enabled) return;
+    const target = e.target;
+    const isInteractiveTarget =
+      target instanceof HTMLElement &&
+      Boolean(target.closest('button, a, input, textarea, select, [contenteditable="true"]'));
+
+    if (isInteractiveTarget || !this.enabled) return;
+
+    if (e.code === 'KeyP') {
+      this.handlers.onPauseToggle();
+      return;
+    }
 
     switch (e.code) {
       case 'ArrowLeft':
@@ -94,14 +108,17 @@ export class Controls {
   }
 
   _handleTouchStart(e) {
-    if (!this.enabled || e.touches.length === 0) return;
+    if (!this.enabled || e.touches.length !== 1) {
+      this.swipeConsumed = true;
+      return;
+    }
     this.touchStartX = e.touches[0].clientX;
     this.touchStartY = e.touches[0].clientY;
     this.swipeConsumed = false;
   }
 
   _handleTouchMove(e) {
-    if (!this.enabled || this.swipeConsumed || e.touches.length === 0) return;
+    if (!this.enabled || this.swipeConsumed || e.touches.length !== 1) return;
     e.preventDefault();
 
     const dx = e.touches[0].clientX - this.touchStartX;
@@ -115,9 +132,10 @@ export class Controls {
     if (absX > absY) {
       if (dx < 0) this.handlers.onLeft();
       else this.handlers.onRight();
+    } else if (dy < 0) {
+      this.handlers.onJump();
     } else {
-      if (dy < 0) this.handlers.onJump();
-      else this.handlers.onSlide();
+      this.handlers.onSlide();
     }
   }
 
@@ -130,6 +148,7 @@ export class Controls {
     this.touchTarget.removeEventListener('touchstart', this._onTouchStart);
     this.touchTarget.removeEventListener('touchmove', this._onTouchMove);
     this.touchTarget.removeEventListener('touchend', this._onTouchEnd);
+    this.touchTarget.removeEventListener('touchcancel', this._onTouchEnd);
     for (const cleanup of this._buttonCleanups) {
       cleanup();
     }
