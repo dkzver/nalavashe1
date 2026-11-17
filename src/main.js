@@ -34,12 +34,18 @@ function bootstrap() {
 
   window.requestAnimationFrame(() => {
     ui.setLoadingProgress(75);
-    game = new Game({ container, audio, ui });
 
-    window.setTimeout(() => {
-      ui.setLoadingProgress(100);
-      ui.showScreen('menu');
-    }, 260);
+    try {
+      game = new Game({ container, audio, ui });
+      window.setTimeout(() => {
+        ui.setLoadingProgress(100);
+        ui.showScreen('menu');
+      }, 260);
+    } catch (error) {
+      // Keep the restaurant link available when WebGL or GPU initialization fails.
+      console.error('LAVA DASH could not initialize:', error);
+      ui.showScreen('error');
+    }
   });
 
   window.addEventListener('beforeunload', () => {
